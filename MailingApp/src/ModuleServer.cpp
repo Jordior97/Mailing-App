@@ -76,6 +76,9 @@ void ModuleServer::onPacketReceived(SOCKET socket, const InputMemoryStream & str
 	case PacketType::SendMessageRequest:
 		onPacketReceivedSendMessage(socket, stream);
 		break;
+	case PacketType::EraseMessageRequest:
+		onPacketReceivedEraseMessage(socket, stream);
+		break;
 	default:
 		LOG("Unknown packet type received");
 		break;
@@ -141,6 +144,21 @@ void ModuleServer::onPacketReceivedSendMessage(SOCKET socket, const InputMemoryS
 
 	// Insert the message in the database
 	database()->insertMessage(message);
+}
+
+void ModuleServer::onPacketReceivedEraseMessage(SOCKET socket, const InputMemoryStream & stream)
+{
+	Message message;
+
+	// TODO: Deserialize the packet (all fields in Message)
+	stream.Read(message.senderUsername);
+	stream.Read(message.receiverUsername);
+	stream.Read(message.subject);
+	stream.Read(message.body);
+
+
+	// Insert the message in the database
+	database()->ClearMessage(message);
 }
 
 void ModuleServer::sendPacket(SOCKET socket, OutputMemoryStream & stream)
@@ -328,7 +346,8 @@ void ModuleServer::handleIncomingDataFromClient(ClientStateInfo & info)
 			info.invalid = true;
 			return;
 		}
-
+		std::string temp = (char*)&info.recvBuffer;
+		LOG("recv() - Error: WTF: %s", temp.c_str());
 		info.recvByteHead += res;
 		while (info.recvByteHead - info.recvPacketHead > HEADER_SIZE)
 		{
@@ -412,7 +431,7 @@ ModuleServer::ClientStateInfo & ModuleServer::getClientStateInfoForSocket(SOCKET
 		}
 	}
 
-	assert(nullptr && "The client for this socket does not exist.");
+	assert("The client for this socket does not exist.");
 }
 
 bool ModuleServer::existsClientStateInfoForSocket(SOCKET s)
@@ -452,3 +471,4 @@ IDatabaseGateway * ModuleServer::database()
 		return mysqlDatabaseGateway;
 	}
 }
+

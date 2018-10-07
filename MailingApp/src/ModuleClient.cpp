@@ -58,6 +58,9 @@ void ModuleClient::updateMessenger()
 	case ModuleClient::MessengerState::SendingMessage:
 		sendPacketSendMessage(receiverBuf, subjectBuf, messageBuf);
 		break;
+	case ModuleClient::MessengerState::EraseMessage:
+		sendPacketEraseMessage(receiverBufDel, subjectBufDel, messageBufDel);
+		break;
 	default:
 		break;
 	}
@@ -148,6 +151,29 @@ void ModuleClient::sendPacketSendMessage(const char * receiver, const char * sub
 	std::string message_str(message);
 
 	stream.Write(PacketType::SendMessageRequest);
+	stream.Write(sender_str);
+	stream.Write(receiver_str);
+	stream.Write(subject_str);
+	stream.Write(message_str);
+
+	// TODO: Use sendPacket() to send the packet
+	sendPacket(stream);
+
+	messengerState = MessengerState::RequestingMessages;
+}
+
+void ModuleClient::sendPacketEraseMessage(const char * receiver, const char * subject, const char * message)
+{
+	OutputMemoryStream stream;
+
+	// TODO: Serialize message (packet type and all fields in the message)
+	// NOTE: remember that senderBuf contains the current client (i.e. the sender of the message)
+	std::string sender_str(senderBuf);
+	std::string receiver_str(receiver);
+	std::string subject_str(subject);
+	std::string message_str(message);
+
+	stream.Write(PacketType::EraseMessageRequest);
 	stream.Write(sender_str);
 	stream.Write(receiver_str);
 	stream.Write(subject_str);
@@ -272,16 +298,36 @@ void ModuleClient::updateGUI()
 			}
 
 			int i = 0;
+			std::vector<Message>::iterator item = messages.begin();
 			for (auto &message : messages)
 			{
 				ImGui::PushID(i++);
+				bool show = false;
 				if (ImGui::TreeNode(&message, "%s - %s", message.senderUsername.c_str(), message.subject.c_str()))
 				{
+					show = true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Delete"))
+				{
+					// Delete
+					show = false;
+					strcpy_s(receiverBufDel, item._Ptr->receiverUsername.c_str());
+					strcpy_s(subjectBufDel, item._Ptr->subject.c_str());
+					strcpy_s(messageBufDel, item._Ptr->body.c_str());
+					messages.erase(item);
+					messengerState = MessengerState::EraseMessage;
+					ImGui::PopID();
+					ImGui::End();
+					return;
+				}
+				if (show)
+				{
 					ImGui::TextWrapped("%s", message.body.c_str());
-					
+
 					//Send back a response to the sender of the message
 					if (ImGui::Button("Respond"))
-					{	
+					{
 						//Keep the info of sender, subject & message
 						response.destinatary = message.senderUsername;
 						response.subject = "RE: " + message.subject;
@@ -292,11 +338,10 @@ void ModuleClient::updateGUI()
 					}
 					ImGui::TreePop();
 				}
+				item++;
 				ImGui::PopID();
 			}
 		}
-
-
 	}
 
 	ImGui::End();

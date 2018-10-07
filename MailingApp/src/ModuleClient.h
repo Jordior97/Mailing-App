@@ -38,6 +38,8 @@ private:
 
 	void sendPacketSendMessage(const char *receiver, const char *subject, const char *message);
 
+	void sendPacketEraseMessage(const char *receiver, const char *subject, const char *message);
+
 	void sendPacket(const OutputMemoryStream &stream);
 
 	
@@ -88,7 +90,8 @@ private:
 		ShowingMessages,
 		ComposingMessage,
 		SendingMessage,
-		RespondingMessage
+		RespondingMessage,
+		EraseMessage
 	};
 
 	// Current screen of the messenger application
@@ -106,6 +109,10 @@ private:
 	char receiverBuf[64]; // Buffer for the receiver
 	char subjectBuf[256]; // Buffer for the subject
 	char messageBuf[4096];// Buffer for the message
+
+	char receiverBufDel[64]; // Buffer for the receiver
+	char subjectBufDel[256]; // Buffer for the subject
+	char messageBufDel[4096];// Buffer for the message
 
 
 	// Send and receive buffers (low-level stuff)

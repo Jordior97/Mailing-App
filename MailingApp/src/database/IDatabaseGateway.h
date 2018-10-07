@@ -17,6 +17,7 @@ public:
 	// Virtual methods
 
 	virtual void insertMessage(const Message &message) = 0;
+	virtual void ClearMessage(Message &message) = 0;
 
 	virtual std::vector<Message> getAllMessagesReceivedByUser(const std::string &username) = 0;
 
