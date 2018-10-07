@@ -5,6 +5,13 @@
 #include "database/DatabaseTypes.h"
 #include "serialization/MemoryStream.h"
 
+struct MessageResponse
+{
+	std::string destinatary;
+	std::string subject;
+	std::string msg_to_respond;
+};
+
 class ModuleClient : public Module
 {
 public:
@@ -80,7 +87,8 @@ private:
 		ReceivingMessages,
 		ShowingMessages,
 		ComposingMessage,
-		SendingMessage
+		SendingMessage,
+		RespondingMessage
 	};
 
 	// Current screen of the messenger application
@@ -88,6 +96,10 @@ private:
 
 	// All messages in the client inbox
 	std::vector<Message> messages;
+
+	//Auxiliar struct to keep sender & subject of a message to RESPOND it
+	MessageResponse response;
+	bool info_passed = false;
 
 	// Composing Message buffers (for IMGUI)
 	char senderBuf[64] = "loginName";   // Buffer for the sender

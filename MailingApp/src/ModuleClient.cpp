@@ -228,6 +228,31 @@ void ModuleClient::updateGUI()
 				messengerState = MessengerState::ShowingMessages;
 			}
 		}
+		else if (messengerState == MessengerState::RespondingMessage)
+		{
+			//Pass the data into the buffers (only once)
+			if (!info_passed)
+			{
+				strcpy_s(receiverBuf, response.destinatary.c_str());
+				strcpy_s(subjectBuf, response.subject.c_str());
+				strcpy_s(messageBuf, "");
+				info_passed = true;
+			}
+
+			ImGui::Text("Receiver: %s", response.destinatary.c_str());
+			ImGui::Text("Subject: %s", response.subject.c_str());
+			ImGui::TextWrapped("Message: %s", response.msg_to_respond.c_str());
+			
+			ImGui::InputTextMultiline("Response", messageBuf, sizeof(messageBuf));
+			if (ImGui::Button("Send"))
+			{
+				messengerState = MessengerState::SendingMessage;
+			}
+			if (ImGui::Button("Discard"))
+			{
+				messengerState = MessengerState::ShowingMessages;
+			}
+		}
 		else if (messengerState == MessengerState::ShowingMessages)
 		{
 			if (ImGui::Button("Compose message"))
@@ -253,11 +278,25 @@ void ModuleClient::updateGUI()
 				if (ImGui::TreeNode(&message, "%s - %s", message.senderUsername.c_str(), message.subject.c_str()))
 				{
 					ImGui::TextWrapped("%s", message.body.c_str());
+					
+					//Send back a response to the sender of the message
+					if (ImGui::Button("Respond"))
+					{	
+						//Keep the info of sender, subject & message
+						response.destinatary = message.senderUsername;
+						response.subject = "RE: " + message.subject;
+						response.msg_to_respond = message.body;
+						info_passed = false;
+
+						messengerState = MessengerState::RespondingMessage;
+					}
 					ImGui::TreePop();
 				}
 				ImGui::PopID();
 			}
 		}
+
+
 	}
 
 	ImGui::End();
