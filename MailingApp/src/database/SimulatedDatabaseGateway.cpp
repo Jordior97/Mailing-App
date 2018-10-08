@@ -21,12 +21,19 @@ void SimulatedDatabaseGateway::ClearMessage(Message & message)
 	std::vector<Message>::iterator item = allMessages.begin();
 	while (item._Ptr != nullptr)
 	{
-		if (item._Ptr->body == message.body && item._Ptr->receiverUsername == message.receiverUsername && item._Ptr->senderUsername == message.senderUsername && item._Ptr->subject == message.subject)
+		if (item._Ptr->body == message.body && 
+			item._Ptr->receiverUsername == message.receiverUsername && 
+			item._Ptr->senderUsername == message.senderUsername && 
+			item._Ptr->subject == message.subject)
 		{
-			allMessages.erase(item);
+			item = allMessages.erase(item);
 			return;
 		}
-		item++;
+		else
+		{
+			item++;
+		}
+
 	}
 }
 

@@ -283,6 +283,11 @@ void ModuleClient::updateGUI()
 		{
 			if (ImGui::Button("Compose message"))
 			{
+				//Clean buffers
+				strcpy_s(receiverBuf, "");
+				strcpy_s(subjectBuf, "");
+				strcpy_s(messageBuf, "");
+
 				messengerState = MessengerState::ComposingMessage;
 			}
 
@@ -298,34 +303,17 @@ void ModuleClient::updateGUI()
 			}
 
 			int i = 0;
-			std::vector<Message>::iterator item = messages.begin();
+
 			for (auto &message : messages)
 			{
 				ImGui::PushID(i++);
-				bool show = false;
+
 				if (ImGui::TreeNode(&message, "%s - %s", message.senderUsername.c_str(), message.subject.c_str()))
 				{
-					show = true;
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Delete"))
-				{
-					// Delete
-					show = false;
-					strcpy_s(receiverBufDel, item._Ptr->receiverUsername.c_str());
-					strcpy_s(subjectBufDel, item._Ptr->subject.c_str());
-					strcpy_s(messageBufDel, item._Ptr->body.c_str());
-					messages.erase(item);
-					messengerState = MessengerState::EraseMessage;
-					ImGui::PopID();
-					ImGui::End();
-					return;
-				}
-				if (show)
-				{
+					//MESSAGE TEXT
 					ImGui::TextWrapped("%s", message.body.c_str());
 
-					//Send back a response to the sender of the message
+					//RESPONSE BUTTON: Send back a response to the sender of the message
 					if (ImGui::Button("Respond"))
 					{
 						//Keep the info of sender, subject & message
@@ -336,9 +324,20 @@ void ModuleClient::updateGUI()
 
 						messengerState = MessengerState::RespondingMessage;
 					}
+
+					ImGui::SameLine();
+
+					//DELETE BUTTON: Delete the selected message
+					if (ImGui::Button("Delete"))
+					{
+						strcpy_s(receiverBufDel, message.receiverUsername.c_str());
+						strcpy_s(subjectBufDel, message.subject.c_str());
+						strcpy_s(messageBufDel, message.body.c_str());
+
+						messengerState = MessengerState::EraseMessage;
+					}
 					ImGui::TreePop();
 				}
-				item++;
 				ImGui::PopID();
 			}
 		}
