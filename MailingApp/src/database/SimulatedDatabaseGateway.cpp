@@ -37,7 +37,6 @@ void SimulatedDatabaseGateway::ClearMessage(Message & message)
 	}
 }
 
-
 std::vector<Message> SimulatedDatabaseGateway::getAllMessagesReceivedByUser(const std::string & username)
 {
 	std::vector<Message> messages;
