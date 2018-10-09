@@ -167,6 +167,7 @@ void ModuleClient::onPacketReceivedChatMessagesResponse(const InputMemoryStream 
 		messagesChat.push_back(message);
 	}
 
+	doscrollChatDown = true;
 	chatState = ChatState::ReceivingMessages;
 }
 
@@ -471,14 +472,29 @@ void ModuleClient::updateGUIChat()
 {
 	ImGui::Begin("Chat Windows");
 
+	ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ChildBg, ImVec4(0.2, 0.2, 0.2, 1));
+	ImGui::BeginChild("Child", ImVec2(0, ImGui::GetWindowHeight() - 75), false);
 	for (int i = 0; i < messagesChat.size(); i++)
 	{
+		ImGui::Text("  "); ImGui::SameLine();
 		ImGui::TextColored(GetColorFromString(messagesChat[i].color), messagesChat[i].senderUsername.c_str()); ImGui::SameLine();
-		ImGui::Text("             "); ImGui::SameLine();
+		ImGui::Text("         "); ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.85, 0.85, 0.85, 1), messagesChat[i].date.c_str());
-		ImGui::Text("    "); ImGui::SameLine();
+		ImGui::Text("       "); ImGui::SameLine();
 		ImGui::TextWrapped(messagesChat[i].body.c_str());
 	}
+	if (scrollChatDown)
+	{
+		ImGui::SetScrollY(ImGui::GetScrollMaxY());
+		scrollChatDown = false;
+	}
+	if (doscrollChatDown)
+	{
+		doscrollChatDown = false;
+		scrollChatDown = true;
+	}
+	ImGui::PopStyleColor();
+	ImGui::EndChild();
 
 	ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
 	//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
@@ -487,13 +503,15 @@ void ModuleClient::updateGUIChat()
 	{
 		chatState = ChatState::SendingMessage;
 	}
+
+
 	ImGui::SameLine();
 	if (ImGui::Button("Send"))
 	{
 		chatState = ChatState::SendingMessage;
 	}
-	ImGui::End();
 
+	ImGui::End();
 }
 
 ImVec4 ModuleClient::GetColorFromString(std::string color_id)
@@ -522,6 +540,7 @@ ImVec4 ModuleClient::GetColorFromString(std::string color_id)
 	{
 		return ImVec4(1, 0, 1, 1);
 	}
+	return ImVec4(1, 1, 1, 1);
 }
 
 // Low-level networking stuff...

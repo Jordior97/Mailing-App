@@ -350,7 +350,7 @@ void ModuleServer::startServer()
 	state = ServerState::Running;
 
 	// Colors
-	countClientsColor = rand() % MAX_COLORS + 1;
+	countClientsColor = rand() % MAX_COLORS;
 
 	LOG("Sever listening port %d", port);
 }

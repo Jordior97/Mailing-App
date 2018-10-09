@@ -143,6 +143,8 @@ private:
 
 	// Chat
 	char messageBufChat[4096];// Buffer for the message
+	bool scrollChatDown = false;
+	bool doscrollChatDown = false;
 
 
 	// Send and receive buffers (low-level stuff)
