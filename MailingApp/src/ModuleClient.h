@@ -6,6 +6,8 @@
 #include "database/DataBaseChat.h"
 #include "serialization/MemoryStream.h"
 
+struct ImVec4;
+
 struct MessageResponse
 {
 	std::string destinatary;
@@ -55,6 +57,8 @@ private:
 	void updateGUI();
 
 	void updateGUIChat();
+
+	ImVec4 GetColorFromString(std::string color_id);
 
 
 	// Low-level networking stuff
@@ -116,7 +120,7 @@ private:
 	// Current screen of the messenger application
 	MessengerState messengerState = MessengerState::SendingLogin;
 	// Current screen of the ChatState application
-	ChatState chatState = ChatState::ReceivingMessages;
+	ChatState chatState = ChatState::SendingLogin;
 
 	// All messages in the client inbox
 	std::vector<Message> messages;

@@ -170,13 +170,13 @@
     <ClInclude Include="src\serialization\PacketTypes.h">
       <Filter>Header Files\serialization</Filter>
     </ClInclude>
-    <ClInclude Include="DataBaseChat.h">
-      <Filter>Header Files\database</Filter>
-    </ClInclude>
     <ClInclude Include="src\database\IDatabaseChatGateway.h">
       <Filter>Header Files\database</Filter>
     </ClInclude>
     <ClInclude Include="src\database\SimulatedDatabaseChatGateway.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\database\DataBaseChat.h">
       <Filter>Header Files\database</Filter>
     </ClInclude>
   </ItemGroup>

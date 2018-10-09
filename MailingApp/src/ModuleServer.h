@@ -31,13 +31,15 @@ private:
 
 	void onPacketReceived(SOCKET socket, const InputMemoryStream& stream);
 
+	void onPacketReceivedLoginChat(SOCKET socket);
+
 	void onPacketReceivedLogin(SOCKET socket, const InputMemoryStream& stream);
 
-	void onPacketReceivedLoginChat(SOCKET socket, const InputMemoryStream & stream);
+	//void onPacketReceivedLoginChat(SOCKET socket, const InputMemoryStream & stream);
 
 	void onPacketReceivedQueryAllMessages(SOCKET socket, const InputMemoryStream& stream);
 
-	void onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream);
+	void onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream, bool login = false);
 	
 	void onPacketReceivedSendMessage(SOCKET socket, const InputMemoryStream& stream);
 
@@ -137,6 +139,7 @@ private:
 
 	// List with all connected clients
 	std::list<ClientStateInfo> clients;
+	int countClientsColor = 0;
 
 	// A gateway to database operations
 	IDatabaseGateway *simulatedDatabaseGateway;

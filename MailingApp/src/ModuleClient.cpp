@@ -87,7 +87,7 @@ void ModuleClient::updateChat()
 		// Idle, do nothing
 		break;
 	case ModuleClient::ChatState::SendingMessage:
-		sendPacketSendMessageChat(messageBuf);
+		sendPacketSendMessageChat(messageBufChat);
 		break;
 	case ModuleClient::ChatState::EraseMessage:
 		//sendPacketEraseMessage(receiverBufDel, subjectBufDel, messageBufDel);
@@ -162,6 +162,7 @@ void ModuleClient::onPacketReceivedChatMessagesResponse(const InputMemoryStream 
 		stream.Read(message.senderUsername);
 		stream.Read(message.date);
 		stream.Read(message.body);
+		stream.Read(message.color);
 
 		messagesChat.push_back(message);
 	}
@@ -259,6 +260,8 @@ void ModuleClient::sendPacketSendMessageChat(const char *message)
 
 	// TODO: Use sendPacket() to send the packet
 	sendPacket(stream);
+
+	strcpy_s(messageBufChat, "");
 
 	chatState = ChatState::ReceivingMessages;
 }
@@ -470,7 +473,7 @@ void ModuleClient::updateGUIChat()
 
 	for (int i = 0; i < messagesChat.size(); i++)
 	{
-		ImGui::TextColored(ImVec4(1, 0, 0, 1), messagesChat[i].senderUsername.c_str()); ImGui::SameLine();
+		ImGui::TextColored(GetColorFromString(messagesChat[i].color), messagesChat[i].senderUsername.c_str()); ImGui::SameLine();
 		ImGui::Text("             "); ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.85, 0.85, 0.85, 1), messagesChat[i].date.c_str());
 		ImGui::Text("    "); ImGui::SameLine();
@@ -480,13 +483,45 @@ void ModuleClient::updateGUIChat()
 	ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
 	//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
 	ImGui::Separator();
-	ImGui::InputText("Message", messageBuf, sizeof(messageBuf)); ImGui::SameLine();
+	if (ImGui::InputText("Message", messageBufChat, sizeof(messageBufChat), ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		chatState = ChatState::SendingMessage;
+	}
+	ImGui::SameLine();
 	if (ImGui::Button("Send"))
 	{
 		chatState = ChatState::SendingMessage;
 	}
 	ImGui::End();
 
+}
+
+ImVec4 ModuleClient::GetColorFromString(std::string color_id)
+{
+	if (color_id.compare("0") == 0)
+	{
+		return ImVec4(0, 1, 1, 1);
+	}
+	if (color_id.compare("1") == 0)
+	{
+		return ImVec4(0, 1, 0, 1);
+	}
+	if (color_id.compare("2") == 0)
+	{
+		return ImVec4(0, 0, 1, 1);
+	}
+	if (color_id.compare("3") == 0)
+	{
+		return ImVec4(1, 1, 0, 1);
+	}
+	if (color_id.compare("4") == 0)
+	{
+		return ImVec4(1, 0, 0, 1);
+	}
+	if (color_id.compare("5") == 0)
+	{
+		return ImVec4(1, 0, 1, 1);
+	}
 }
 
 // Low-level networking stuff...

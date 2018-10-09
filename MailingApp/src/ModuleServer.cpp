@@ -5,13 +5,15 @@
 #include "database/MySqlDatabaseGateway.h"
 #include "database/SimulatedDatabaseGateway.h"
 #include "database/SimulatedDatabaseChatGateway.h"
-
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 static bool g_SimulateDatabaseConnection = true;
 
 
 #define HEADER_SIZE sizeof(uint32_t)
 #define RECV_CHUNK_SIZE 4096
+#define MAX_COLORS 6
 
 
 ModuleServer::ModuleServer()
@@ -19,6 +21,7 @@ ModuleServer::ModuleServer()
 	mysqlDatabaseGateway = new MySqlDatabaseGateway();
 	simulatedDatabaseGateway = new SimulatedDatabaseGateway();
 	simulatedDatabaseChatGateway = new SimulatedDatabaseChatGateway();
+	srand(time(NULL));
 }
 
 ModuleServer::~ModuleServer()
@@ -84,7 +87,8 @@ void ModuleServer::onPacketReceived(SOCKET socket, const InputMemoryStream & str
 		break;
 	// CHAT ------------------------------------
 	case PacketType::LoginRequestChat:
-		onPacketReceivedLogin(socket, stream);
+		onPacketReceivedLoginChat(socket);
+		onPacketSendAllChat(socket, stream, true);
 		break;
 	case PacketType::ChatMessageRequest:
 		onPacketReceivedChatMessage(socket, stream);
@@ -108,16 +112,16 @@ void ModuleServer::onPacketReceivedLogin(SOCKET socket, const InputMemoryStream 
 	client.color = loginName;
 }
 
-void ModuleServer::onPacketReceivedLoginChat(SOCKET socket, const InputMemoryStream & stream)
+void ModuleServer::onPacketReceivedLoginChat(SOCKET socket)
 {
-	std::string loginName;
-
-	// TODO: Deserialize the login username into loginName
-	stream.Read(loginName);
-
 	// Register the client with this socket with the deserialized username
 	ClientStateInfo & client = getClientStateInfoForSocket(socket);
-	client.loginName = loginName;
+	client.color = std::to_string(countClientsColor);
+	countClientsColor++;
+	if (countClientsColor > MAX_COLORS - 1)
+	{
+		countClientsColor = 0;
+	}
 }
 
 void ModuleServer::onPacketReceivedQueryAllMessages(SOCKET socket, const InputMemoryStream & stream)
@@ -127,13 +131,21 @@ void ModuleServer::onPacketReceivedQueryAllMessages(SOCKET socket, const InputMe
 	sendPacketQueryAllMessagesResponse(socket, clientStateInfo.loginName);
 }
 
-void ModuleServer::onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream)
+void ModuleServer::onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream, bool login)
 {
 	// Get the username of this socket and send the response to it
-	for (auto& client : clients)
+	if (login == false)
 	{
-		ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(client.socket);
-		sendPacketQueryAllMessagesResponseCHAT(client.socket);
+		for (auto& client : clients)
+		{
+			ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(client.socket);
+			sendPacketQueryAllMessagesResponseCHAT(client.socket);
+		}
+	}
+	else
+	{
+		ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(socket);
+		sendPacketQueryAllMessagesResponseCHAT(socket);
 	}
 }
 
@@ -184,6 +196,7 @@ void ModuleServer::sendPacketQueryAllMessagesResponseCHAT(SOCKET socket)
 		outStream.Write(messages[i].senderUsername);
 		outStream.Write(messages[i].date);
 		outStream.Write(messages[i].body);
+		outStream.Write(messages[i].color);
 	}
 
 	// TODO: Send the packet (pass the outStream to the sendPacket function)
@@ -213,6 +226,8 @@ void ModuleServer::onPacketReceivedChatMessage(SOCKET socket, const InputMemoryS
 	stream.Read(message.senderUsername);
 	stream.Read(message.date);
 	stream.Read(message.body);
+	ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(socket);
+	message.color = clientStateInfo.color;
 
 
 	// Insert the message in the database
@@ -333,6 +348,9 @@ void ModuleServer::startServer()
 
 	// Next state
 	state = ServerState::Running;
+
+	// Colors
+	countClientsColor = rand() % MAX_COLORS + 1;
 
 	LOG("Sever listening port %d", port);
 }
