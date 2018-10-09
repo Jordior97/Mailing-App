@@ -357,7 +357,7 @@ void ModuleClient::updateGUI()
 		{
 			if (ImGui::Button("Disconnect Chat"))
 			{
-
+				chatWindows = false;
 			}
 		}
 

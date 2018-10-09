@@ -84,11 +84,11 @@
     <ClCompile Include="src\database\MySqlDatabaseGateway.cpp">
       <Filter>Source Files\database</Filter>
     </ClCompile>
-    <ClCompile Include="src\database\SimulatedDatabaseGateway.cpp">
-      <Filter>Source Files\database</Filter>
-    </ClCompile>
     <ClCompile Include="src\serialization\MemoryStream.cpp">
       <Filter>Source Files\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\database\SimulatedDatabaseGateway.cpp">
+      <Filter>Source Files\database</Filter>
     </ClCompile>
     <ClCompile Include="src\database\SimulatedDatabaseChatGateway.cpp">
       <Filter>Source Files\database</Filter>
