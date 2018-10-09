@@ -1,30 +1,29 @@
-#include "SimulatedDatabaseGateway.h"
+#include "SimulatedDatabaseChatGateway.h"
 
 
 
-SimulatedDatabaseGateway::SimulatedDatabaseGateway()
+SimulatedDatabaseChatGateway::SimulatedDatabaseChatGateway()
 {
 }
 
 
-SimulatedDatabaseGateway::~SimulatedDatabaseGateway()
+SimulatedDatabaseChatGateway::~SimulatedDatabaseChatGateway()
 {
 }
 
-void SimulatedDatabaseGateway::insertMessage(const Message & message)
+void SimulatedDatabaseChatGateway::insertMessage(const MessageChat & message)
 {
 	allMessages.push_back(message);
 }
 
-void SimulatedDatabaseGateway::ClearMessage(Message & message)
+void SimulatedDatabaseChatGateway::ClearMessage(MessageChat & message)
 {
-	std::vector<Message>::iterator item = allMessages.begin();
+	std::vector<MessageChat>::iterator item = allMessages.begin();
 	while (item._Ptr != nullptr)
 	{
 		if (item._Ptr->body == message.body && 
-			item._Ptr->receiverUsername == message.receiverUsername && 
 			item._Ptr->senderUsername == message.senderUsername && 
-			item._Ptr->subject == message.subject)
+			item._Ptr->date == message.date)
 		{
 			item = allMessages.erase(item);
 			return;
@@ -37,15 +36,7 @@ void SimulatedDatabaseGateway::ClearMessage(Message & message)
 	}
 }
 
-std::vector<Message> SimulatedDatabaseGateway::getAllMessagesReceivedByUser(const std::string & username)
+std::vector<MessageChat> SimulatedDatabaseChatGateway::getAllMessages()
 {
-	std::vector<Message> messages;
-	for (const auto & message : allMessages)
-	{
-		if (message.receiverUsername == username)
-		{
-			messages.push_back(message);
-		}
-	}
-	return messages;
+	return allMessages;
 }

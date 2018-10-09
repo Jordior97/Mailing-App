@@ -2,6 +2,8 @@
 #include "Log.h"
 #include "imgui/imgui.h"
 #include "serialization/PacketTypes.h"
+#include <time.h>
+#pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 #define HEADER_SIZE sizeof(uint32_t)
 #define RECV_CHUNK_SIZE 4096
@@ -9,7 +11,10 @@
 bool ModuleClient::update()
 {
 	updateGUI();
-
+	if (chatWindows)
+	{
+		updateGUIChat();
+	}
 	switch (state)
 	{
 	case ModuleClient::ClientState::Connecting:
@@ -18,6 +23,8 @@ bool ModuleClient::update()
 	case ModuleClient::ClientState::Connected:
 		handleIncomingData();
 		updateMessenger();
+		if(chatWindows)
+			updateChat();
 		handleOutgoingData();
 		break;
 	case ModuleClient::ClientState::Disconnecting:
@@ -66,6 +73,30 @@ void ModuleClient::updateMessenger()
 	}
 }
 
+void ModuleClient::updateChat()
+{
+	switch (chatState)
+	{
+	case ModuleClient::ChatState::SendingLogin:
+		sendPacketLoginChat();
+		break;
+	case ModuleClient::ChatState::ReceivingMessages:
+		// Idle, do nothing
+		break;
+	case ModuleClient::ChatState::ShowingMessages:
+		// Idle, do nothing
+		break;
+	case ModuleClient::ChatState::SendingMessage:
+		sendPacketSendMessageChat(messageBuf);
+		break;
+	case ModuleClient::ChatState::EraseMessage:
+		//sendPacketEraseMessage(receiverBufDel, subjectBufDel, messageBufDel);
+		break;
+	default:
+		break;
+	}
+}
+
 void ModuleClient::onPacketReceived(const InputMemoryStream & stream)
 {
 	PacketType packetType;
@@ -77,6 +108,9 @@ void ModuleClient::onPacketReceived(const InputMemoryStream & stream)
 	{
 	case PacketType::QueryAllMessagesResponse:
 		onPacketReceivedQueryAllMessagesResponse(stream);
+		break;
+	case PacketType::ChatMessageRequest:
+		onPacketReceivedChatMessagesResponse(stream);
 		break;
 	default:
 		LOG("Unknown packet type received");
@@ -110,6 +144,31 @@ void ModuleClient::onPacketReceivedQueryAllMessagesResponse(const InputMemoryStr
 	messengerState = MessengerState::ShowingMessages;
 }
 
+void ModuleClient::onPacketReceivedChatMessagesResponse(const InputMemoryStream & stream)
+{
+	messagesChat.clear();
+
+	uint32_t messageCount;
+
+	// TODO: Deserialize the number of messages
+	stream.Read(messageCount);
+
+	// TODO: Deserialize messages one by one and push_back them into the messages vector
+	// NOTE: The messages vector is an attribute of this class
+	for (int i = 0; i < messageCount; i++)
+	{
+		MessageChat message;
+
+		stream.Read(message.senderUsername);
+		stream.Read(message.date);
+		stream.Read(message.body);
+
+		messagesChat.push_back(message);
+	}
+
+	chatState = ChatState::ReceivingMessages;
+}
+
 void ModuleClient::sendPacketLogin(const char * username)
 {
 	OutputMemoryStream stream;
@@ -124,6 +183,19 @@ void ModuleClient::sendPacketLogin(const char * username)
 	sendPacket(stream);
 
 	messengerState = MessengerState::RequestingMessages;
+}
+
+void ModuleClient::sendPacketLoginChat()
+{
+	OutputMemoryStream stream;
+
+	// TODO: Serialize Login (packet type and username)
+	stream.Write(PacketType::LoginRequestChat);
+
+	// TODO: Use sendPacket() to send the packet
+	sendPacket(stream);
+
+	chatState = ChatState::ReceivingMessages;
 }
 
 void ModuleClient::sendPacketQueryMessages()
@@ -160,6 +232,35 @@ void ModuleClient::sendPacketSendMessage(const char * receiver, const char * sub
 	sendPacket(stream);
 
 	messengerState = MessengerState::RequestingMessages;
+}
+
+void ModuleClient::sendPacketSendMessageChat(const char *message)
+{
+	OutputMemoryStream stream;
+
+	// TODO: Serialize message (packet type and all fields in the message)
+	// NOTE: remember that senderBuf contains the current client (i.e. the sender of the message)
+	std::string sender_str(senderBuf);
+
+	// Get World Time
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[80];
+	tstruct = *localtime(&now);
+	strftime(buf, sizeof(buf), "%X", &tstruct);
+	std::string date_str(buf);
+
+	std::string message_str(message);
+
+	stream.Write(PacketType::ChatMessageRequest);
+	stream.Write(sender_str);
+	stream.Write(date_str);
+	stream.Write(message_str);
+
+	// TODO: Use sendPacket() to send the packet
+	sendPacket(stream);
+
+	chatState = ChatState::ReceivingMessages;
 }
 
 void ModuleClient::sendPacketEraseMessage(const char * receiver, const char * subject, const char * message)
@@ -237,6 +338,22 @@ void ModuleClient::updateGUI()
 			if (state == ClientState::Connected)
 			{
 				state = ClientState::Disconnecting;
+			}
+		}
+
+		// Chat button
+		if (chatWindows == false)
+		{
+			if (ImGui::Button("Connect Chat"))
+			{
+				chatWindows = true;
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Disconnect Chat"))
+			{
+
 			}
 		}
 
@@ -347,6 +464,30 @@ void ModuleClient::updateGUI()
 
 }
 
+void ModuleClient::updateGUIChat()
+{
+	ImGui::Begin("Chat Windows");
+
+	for (int i = 0; i < messagesChat.size(); i++)
+	{
+		ImGui::TextColored(ImVec4(1, 0, 0, 1), messagesChat[i].senderUsername.c_str()); ImGui::SameLine();
+		ImGui::Text("             "); ImGui::SameLine();
+		ImGui::TextColored(ImVec4(0.85, 0.85, 0.85, 1), messagesChat[i].date.c_str());
+		ImGui::Text("    "); ImGui::SameLine();
+		ImGui::TextWrapped(messagesChat[i].body.c_str());
+	}
+
+	ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
+	//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
+	ImGui::Separator();
+	ImGui::InputText("Message", messageBuf, sizeof(messageBuf)); ImGui::SameLine();
+	if (ImGui::Button("Send"))
+	{
+		chatState = ChatState::SendingMessage;
+	}
+	ImGui::End();
+
+}
 
 // Low-level networking stuff...
 

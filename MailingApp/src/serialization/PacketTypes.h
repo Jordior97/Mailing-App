@@ -8,5 +8,8 @@ enum class PacketType : int8_t
 	QueryAllMessagesRequest,
 	QueryAllMessagesResponse,
 	SendMessageRequest,
-	EraseMessageRequest
+	EraseMessageRequest,
+	// Chat ----
+	LoginRequestChat,
+	ChatMessageRequest
 };

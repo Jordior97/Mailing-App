@@ -90,6 +90,9 @@
     <ClCompile Include="src\serialization\MemoryStream.cpp">
       <Filter>Source Files\serialization</Filter>
     </ClCompile>
+    <ClCompile Include="src\database\SimulatedDatabaseChatGateway.cpp">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.h">
@@ -166,6 +169,15 @@
     </ClInclude>
     <ClInclude Include="src\serialization\PacketTypes.h">
       <Filter>Header Files\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="DataBaseChat.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\database\IDatabaseChatGateway.h">
+      <Filter>Header Files\database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\database\SimulatedDatabaseChatGateway.h">
+      <Filter>Header Files\database</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

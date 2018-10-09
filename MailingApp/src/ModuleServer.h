@@ -6,6 +6,7 @@
 #include <list>
 
 class IDatabaseGateway;
+class IDatabaseChatGateway;
 
 class ModuleServer : public Module
 {
@@ -32,13 +33,21 @@ private:
 
 	void onPacketReceivedLogin(SOCKET socket, const InputMemoryStream& stream);
 
+	void onPacketReceivedLoginChat(SOCKET socket, const InputMemoryStream & stream);
+
 	void onPacketReceivedQueryAllMessages(SOCKET socket, const InputMemoryStream& stream);
+
+	void onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream);
 	
 	void onPacketReceivedSendMessage(SOCKET socket, const InputMemoryStream& stream);
+
+	void onPacketReceivedChatMessage(SOCKET socket, const InputMemoryStream & stream);
 
 	void onPacketReceivedEraseMessage(SOCKET socket, const InputMemoryStream & stream);
 
 	void sendPacketQueryAllMessagesResponse(SOCKET socket, const std::string &username);
+
+	void sendPacketQueryAllMessagesResponseCHAT(SOCKET socket);
 
 	void sendPacket(SOCKET socket, OutputMemoryStream& stream);
 
@@ -80,6 +89,7 @@ private:
 	// Database
 
 	IDatabaseGateway *database();
+	IDatabaseChatGateway *databaseChat();
 
 
 	// Data members
@@ -119,6 +129,8 @@ private:
 		// Login
 		std::string loginName;
 
+		std::string color;
+
 		// bool should it be deleted?
 		bool invalid = false;
 	};
@@ -129,4 +141,5 @@ private:
 	// A gateway to database operations
 	IDatabaseGateway *simulatedDatabaseGateway;
 	IDatabaseGateway *mysqlDatabaseGateway;
+	IDatabaseChatGateway *simulatedDatabaseChatGateway;
 };

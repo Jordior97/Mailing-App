@@ -118,6 +118,7 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\database\DBConnection.cpp" />
     <ClCompile Include="src\database\MySqlDatabaseGateway.cpp" />
+    <ClCompile Include="src\database\SimulatedDatabaseChatGateway.cpp" />
     <ClCompile Include="src\database\SimulatedDatabaseGateway.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
@@ -136,11 +137,14 @@
     <ClCompile Include="src\SocketUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataBaseChat.h" />
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\database\DatabaseTypes.h" />
     <ClInclude Include="src\database\DBConnection.h" />
+    <ClInclude Include="src\database\IDatabaseChatGateway.h" />
     <ClInclude Include="src\database\IDatabaseGateway.h" />
     <ClInclude Include="src\database\MySqlDatabaseGateway.h" />
+    <ClInclude Include="src\database\SimulatedDatabaseChatGateway.h" />
     <ClInclude Include="src\database\SimulatedDatabaseGateway.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />

@@ -4,6 +4,7 @@
 #include "serialization/PacketTypes.h"
 #include "database/MySqlDatabaseGateway.h"
 #include "database/SimulatedDatabaseGateway.h"
+#include "database/SimulatedDatabaseChatGateway.h"
 
 
 static bool g_SimulateDatabaseConnection = true;
@@ -17,12 +18,14 @@ ModuleServer::ModuleServer()
 {
 	mysqlDatabaseGateway = new MySqlDatabaseGateway();
 	simulatedDatabaseGateway = new SimulatedDatabaseGateway();
+	simulatedDatabaseChatGateway = new SimulatedDatabaseChatGateway();
 }
 
 ModuleServer::~ModuleServer()
 {
 	delete mysqlDatabaseGateway;
 	delete simulatedDatabaseGateway;
+	delete simulatedDatabaseChatGateway;
 }
 
 bool ModuleServer::update()
@@ -79,6 +82,14 @@ void ModuleServer::onPacketReceived(SOCKET socket, const InputMemoryStream & str
 	case PacketType::EraseMessageRequest:
 		onPacketReceivedEraseMessage(socket, stream);
 		break;
+	// CHAT ------------------------------------
+	case PacketType::LoginRequestChat:
+		onPacketReceivedLogin(socket, stream);
+		break;
+	case PacketType::ChatMessageRequest:
+		onPacketReceivedChatMessage(socket, stream);
+		onPacketSendAllChat(socket, stream);
+		break;
 	default:
 		LOG("Unknown packet type received");
 		break;
@@ -86,6 +97,18 @@ void ModuleServer::onPacketReceived(SOCKET socket, const InputMemoryStream & str
 }
 
 void ModuleServer::onPacketReceivedLogin(SOCKET socket, const InputMemoryStream & stream)
+{
+	std::string loginName;
+
+	// TODO: Deserialize the login username into loginName
+	stream.Read(loginName);
+
+	// Register the client with this socket with the deserialized username
+	ClientStateInfo & client = getClientStateInfoForSocket(socket);
+	client.color = loginName;
+}
+
+void ModuleServer::onPacketReceivedLoginChat(SOCKET socket, const InputMemoryStream & stream)
 {
 	std::string loginName;
 
@@ -102,6 +125,16 @@ void ModuleServer::onPacketReceivedQueryAllMessages(SOCKET socket, const InputMe
 	// Get the username of this socket and send the response to it
 	ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(socket);
 	sendPacketQueryAllMessagesResponse(socket, clientStateInfo.loginName);
+}
+
+void ModuleServer::onPacketSendAllChat(SOCKET socket, const InputMemoryStream & stream)
+{
+	// Get the username of this socket and send the response to it
+	for (auto& client : clients)
+	{
+		ClientStateInfo & clientStateInfo = getClientStateInfoForSocket(client.socket);
+		sendPacketQueryAllMessagesResponseCHAT(client.socket);
+	}
 }
 
 void ModuleServer::sendPacketQueryAllMessagesResponse(SOCKET socket, const std::string &username)
@@ -131,6 +164,32 @@ void ModuleServer::sendPacketQueryAllMessagesResponse(SOCKET socket, const std::
 	sendPacket(socket, outStream);
 }
 
+void ModuleServer::sendPacketQueryAllMessagesResponseCHAT(SOCKET socket)
+{
+	// Obtain the list of messages from the DB
+	std::vector<MessageChat> messages = databaseChat()->getAllMessages();
+
+	OutputMemoryStream outStream;
+	// TODO: Create QueryAllMessagesResponse and serialize all the messages
+	// -- serialize the packet type
+	// -- serialize the array size
+	// -- serialize the messages in the array
+	uint32_t messageCount = messages.size();
+
+	outStream.Write(PacketType::ChatMessageRequest);
+	outStream.Write(messageCount);
+
+	for (int i = 0; i < messages.size(); i++)
+	{
+		outStream.Write(messages[i].senderUsername);
+		outStream.Write(messages[i].date);
+		outStream.Write(messages[i].body);
+	}
+
+	// TODO: Send the packet (pass the outStream to the sendPacket function)
+	sendPacket(socket, outStream);
+}
+
 void ModuleServer::onPacketReceivedSendMessage(SOCKET socket, const InputMemoryStream & stream)
 {
 	Message message;
@@ -144,6 +203,20 @@ void ModuleServer::onPacketReceivedSendMessage(SOCKET socket, const InputMemoryS
 
 	// Insert the message in the database
 	database()->insertMessage(message);
+}
+
+void ModuleServer::onPacketReceivedChatMessage(SOCKET socket, const InputMemoryStream & stream)
+{
+	MessageChat message;
+
+	// TODO: Deserialize the packet (all fields in Message)
+	stream.Read(message.senderUsername);
+	stream.Read(message.date);
+	stream.Read(message.body);
+
+
+	// Insert the message in the database
+	databaseChat()->insertMessage(message);
 }
 
 void ModuleServer::onPacketReceivedEraseMessage(SOCKET socket, const InputMemoryStream & stream)
@@ -470,5 +543,10 @@ IDatabaseGateway * ModuleServer::database()
 	} else {
 		return mysqlDatabaseGateway;
 	}
+}
+
+IDatabaseChatGateway * ModuleServer::databaseChat()
+{
+	return simulatedDatabaseChatGateway;
 }
 

@@ -3,6 +3,7 @@
 #include "Module.h"
 #include "SocketUtils.h"
 #include "database/DatabaseTypes.h"
+#include "database/DataBaseChat.h"
 #include "serialization/MemoryStream.h"
 
 struct MessageResponse
@@ -27,16 +28,22 @@ private:
 	// Methods involving serialization / deserialization (contain TODOs)
 
 	void updateMessenger();
+	void updateChat();
 
 	void onPacketReceived(const InputMemoryStream &stream);
 
 	void onPacketReceivedQueryAllMessagesResponse(const InputMemoryStream &stream);
+	void onPacketReceivedChatMessagesResponse(const InputMemoryStream &stream);
 
 	void sendPacketLogin(const char *username);
+
+	void sendPacketLoginChat();
 
 	void sendPacketQueryMessages();
 
 	void sendPacketSendMessage(const char *receiver, const char *subject, const char *message);
+
+	void sendPacketSendMessageChat(const char * message);
 
 	void sendPacketEraseMessage(const char *receiver, const char *subject, const char *message);
 
@@ -46,6 +53,8 @@ private:
 	// GUI
 
 	void updateGUI();
+
+	void updateGUIChat();
 
 
 	// Low-level networking stuff
@@ -94,15 +103,29 @@ private:
 		EraseMessage
 	};
 
+	// Current screen of the messenger app
+	enum class ChatState
+	{
+		SendingLogin,
+		ReceivingMessages,
+		ShowingMessages,
+		SendingMessage,
+		EraseMessage
+	};
+
 	// Current screen of the messenger application
 	MessengerState messengerState = MessengerState::SendingLogin;
+	// Current screen of the ChatState application
+	ChatState chatState = ChatState::ReceivingMessages;
 
 	// All messages in the client inbox
 	std::vector<Message> messages;
+	std::vector<MessageChat> messagesChat;
 
 	//Auxiliar struct to keep sender & subject of a message to RESPOND it
 	MessageResponse response;
 	bool info_passed = false;
+	bool chatWindows = false;
 
 	// Composing Message buffers (for IMGUI)
 	char senderBuf[64] = "loginName";   // Buffer for the sender
@@ -113,6 +136,9 @@ private:
 	char receiverBufDel[64]; // Buffer for the receiver
 	char subjectBufDel[256]; // Buffer for the subject
 	char messageBufDel[4096];// Buffer for the message
+
+	// Chat
+	char messageBufChat[4096];// Buffer for the message
 
 
 	// Send and receive buffers (low-level stuff)
