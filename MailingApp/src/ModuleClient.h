@@ -47,7 +47,7 @@ private:
 
 	void sendPacketSendMessageChat(const char * message);
 
-	void sendPacketEraseMessage(const char *receiver, const char *subject, const char *message);
+	void sendPacketEraseMessage(const char *sender, const char *receiver, const char *subject, const char *message);
 
 	void sendPacket(const OutputMemoryStream &stream);
 
@@ -88,7 +88,7 @@ private:
 	char serverIP[32] = "127.0.0.1";
 
 	// Port used by the server
-	int serverPort = 3306;
+	int serverPort = 8000;
 
 	// Socket to connect to the server
 	SOCKET connSocket;
@@ -133,13 +133,14 @@ private:
 
 	// Composing Message buffers (for IMGUI)
 	char senderBuf[64] = "loginName";   // Buffer for the sender
-	char receiverBuf[64]; // Buffer for the receiver
-	char subjectBuf[256]; // Buffer for the subject
-	char messageBuf[4096];// Buffer for the message
+	char receiverBuf[64];				// Buffer for the receiver
+	char subjectBuf[256];				// Buffer for the subject
+	char messageBuf[4096];				// Buffer for the message
 
-	char receiverBufDel[64]; // Buffer for the receiver
-	char subjectBufDel[256]; // Buffer for the subject
-	char messageBufDel[4096];// Buffer for the message
+	char senderBufDel[64];				// Buffer for the sender
+	char receiverBufDel[64];			// Buffer for the receiver
+	char subjectBufDel[256];			// Buffer for the subject
+	char messageBufDel[4096];			// Buffer for the message
 
 	// Chat
 	char messageBufChat[4096];// Buffer for the message

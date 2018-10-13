@@ -66,7 +66,7 @@ void ModuleClient::updateMessenger()
 		sendPacketSendMessage(receiverBuf, subjectBuf, messageBuf);
 		break;
 	case ModuleClient::MessengerState::EraseMessage:
-		sendPacketEraseMessage(receiverBufDel, subjectBufDel, messageBufDel);
+		sendPacketEraseMessage(senderBufDel, receiverBufDel, subjectBufDel, messageBufDel);
 		break;
 	default:
 		break;
@@ -267,13 +267,13 @@ void ModuleClient::sendPacketSendMessageChat(const char *message)
 	chatState = ChatState::ReceivingMessages;
 }
 
-void ModuleClient::sendPacketEraseMessage(const char * receiver, const char * subject, const char * message)
+void ModuleClient::sendPacketEraseMessage(const char * sender, const char * receiver, const char * subject, const char * message)
 {
 	OutputMemoryStream stream;
 
 	// TODO: Serialize message (packet type and all fields in the message)
 	// NOTE: remember that senderBuf contains the current client (i.e. the sender of the message)
-	std::string sender_str(senderBuf);
+	std::string sender_str(sender);
 	std::string receiver_str(receiver);
 	std::string subject_str(subject);
 	std::string message_str(message);
@@ -319,8 +319,7 @@ void ModuleClient::updateGUI()
 			ImGui::InputText("IP", ipBuffer, sizeof(ipBuffer));
 
 			// Port
-			static int port = 8000;
-			ImGui::InputInt("Port", &port);
+			ImGui::InputInt("Port", &serverPort);
 
 			// Connect button
 			ImGui::InputText("Login name", senderBuf, sizeof(senderBuf));
@@ -451,6 +450,7 @@ void ModuleClient::updateGUI()
 					//DELETE BUTTON: Delete the selected message
 					if (ImGui::Button("Delete"))
 					{
+						strcpy_s(senderBufDel, message.senderUsername.c_str());
 						strcpy_s(receiverBufDel, message.receiverUsername.c_str());
 						strcpy_s(subjectBufDel, message.subject.c_str());
 						strcpy_s(messageBufDel, message.body.c_str());

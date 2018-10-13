@@ -246,7 +246,7 @@ void ModuleServer::onPacketReceivedEraseMessage(SOCKET socket, const InputMemory
 	stream.Read(message.body);
 
 
-	// Insert the message in the database
+	// Erase the message from the database
 	database()->ClearMessage(message);
 }
 

@@ -19,7 +19,7 @@ public:
 
 	void insertMessage(const MessageChat &message) override;
 
-	void ClearMessage(MessageChat & message) override;
+	void ClearMessage(MessageChat &message) override;
 
 	std::vector<MessageChat> getAllMessages() override;
 

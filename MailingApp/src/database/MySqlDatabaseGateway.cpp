@@ -41,8 +41,10 @@ void MySqlDatabaseGateway::insertMessage(const Message & message)
 		DBResultSet res;
 
 		std::string sqlStatement;
+
 		// TODO: Create the SQL statement to insert the passed message into the DB (INSERT)
-		sqlStatement = "INSERT jordior4.MAIL VALUES ('" + message.senderUsername + "', '" + message.receiverUsername + "', '" + message.subject + "', '" + message.body + "')";
+		std::string database = bufMySqlDatabase;
+		sqlStatement = "INSERT " + database + ".MAIL VALUES ('" + message.senderUsername + "', '" + message.receiverUsername + "', '" + message.subject + "', '" + message.body + "')";
 
 		// insert some messages
 		db.sql(sqlStatement.c_str());
@@ -51,6 +53,24 @@ void MySqlDatabaseGateway::insertMessage(const Message & message)
 
 void MySqlDatabaseGateway::ClearMessage(Message & message)
 {
+	DBConnection db(bufMySqlHost, bufMySqlPort, bufMySqlDatabase, bufMySqlUsername, bufMySqlPassword);
+
+	if (db.isConnected())
+	{
+		DBResultSet res;
+
+		std::string sqlStatement;
+
+		std::string database = bufMySqlDatabase;
+		sqlStatement = "DELETE FROM " + database + ".MAIL WHERE " +
+			"SENDER = '" + message.senderUsername + "' AND " +
+			"RECEIVER = '" + message.receiverUsername + "' AND " +
+			"SUBJECT = '" + message.subject + "' AND " +
+			"BODY = '" + message.body + "'";
+
+		// insert some messages
+		db.sql(sqlStatement.c_str());
+	}
 }
 
 std::vector<Message> MySqlDatabaseGateway::getAllMessagesReceivedByUser(const std::string & username)
@@ -62,8 +82,11 @@ std::vector<Message> MySqlDatabaseGateway::getAllMessagesReceivedByUser(const st
 	if (db.isConnected())
 	{
 		std::string sqlStatement;
+
 		// TODO: Create the SQL statement to query all messages from the given user (SELECT)
-		sqlStatement = "SELECT * FROM jordior4.MAIL";
+		std::string database = bufMySqlDatabase;
+		sqlStatement = "SELECT * FROM " + database + ".MAIL WHERE " + "RECEIVER = '" + username + "'";
+
 
 		// consult all messages
 		DBResultSet res = db.sql(sqlStatement.c_str());
