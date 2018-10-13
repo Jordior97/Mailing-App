@@ -109,6 +109,7 @@ void ModuleServer::onPacketReceivedLogin(SOCKET socket, const InputMemoryStream 
 
 	// Register the client with this socket with the deserialized username
 	ClientStateInfo & client = getClientStateInfoForSocket(socket);
+	client.loginName = loginName;
 	client.color = loginName;
 }
 
@@ -437,8 +438,7 @@ void ModuleServer::handleIncomingDataFromClient(ClientStateInfo & info)
 			info.invalid = true;
 			return;
 		}
-		std::string temp = (char*)&info.recvBuffer;
-		LOG("recv() - Error: WTF: %s", temp.c_str());
+
 		info.recvByteHead += res;
 		while (info.recvByteHead - info.recvPacketHead > HEADER_SIZE)
 		{

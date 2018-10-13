@@ -88,7 +88,7 @@ private:
 	char serverIP[32] = "127.0.0.1";
 
 	// Port used by the server
-	int serverPort = 8000;
+	int serverPort = 3306;
 
 	// Socket to connect to the server
 	SOCKET connSocket;
