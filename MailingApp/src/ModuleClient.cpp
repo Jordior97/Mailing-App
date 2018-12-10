@@ -13,6 +13,7 @@ bool ModuleClient::update()
 	updateGUI();
 	if (chatWindows)
 	{
+		updateGUIRandomGame();
 		updateGUIChat();
 	}
 	switch (state)
@@ -509,6 +510,73 @@ void ModuleClient::updateGUIChat()
 	if (ImGui::Button("Send"))
 	{
 		chatState = ChatState::SendingMessage;
+	}
+
+	ImGui::End();
+}
+
+bool recording = false;
+float	Start_Game;
+float	End_Game;
+int		Enemies_Killed;
+int		Gems;
+bool	Hacks;
+int		keys_pressed;
+int		dies;
+void ModuleClient::updateGUIRandomGame()
+{
+	ImGui::Begin("Random values Windows");
+	if (ImGui::Button("Recording"))
+	{
+		recording = !recording;
+		if (recording)
+		{
+			Start_Game = 0;
+			End_Game = 0;
+			Enemies_Killed = 0;
+			Gems = 0;
+			Hacks = false;
+			keys_pressed = 0;
+			dies = 0;
+		}
+	}
+
+	if (recording)
+	{
+
+
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ChildBg, ImVec4(0.2, 0.2, 0.2, 1));
+		ImGui::BeginChild("Child", ImVec2(0, ImGui::GetWindowHeight() - 75), false);
+
+
+		// float	- Time Start Game
+		// float	- Time End Game
+		// int		- Number Enemies Killed
+		// int		- Number of Gems 
+		// bool		- Use Hacks
+		// int		- Number of keys pressed
+		// int		- Number of dies.
+
+		if (scrollChatDown)
+		{
+			ImGui::SetScrollY(ImGui::GetScrollMaxY());
+			scrollChatDown = false;
+		}
+		if (doscrollChatDown)
+		{
+			doscrollChatDown = false;
+			scrollChatDown = true;
+		}
+		ImGui::PopStyleColor();
+		ImGui::EndChild();
+	}
+
+	ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
+	//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
+	ImGui::Separator();
+	if (ImGui::Button("Send"))
+	{
+		recording = false;
 	}
 
 	ImGui::End();

@@ -58,6 +58,8 @@ private:
 
 	void updateGUIChat();
 
+	void updateGUIRandomGame();
+
 	ImVec4 GetColorFromString(std::string color_id);
 
 
