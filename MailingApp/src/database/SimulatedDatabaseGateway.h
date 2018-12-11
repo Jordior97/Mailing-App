@@ -18,6 +18,7 @@ public:
 	// Virtual methods from IDatabaseGateway
 
 	void insertMessage(const Message &message) override;
+	void insertMessageGame(const MessageGameCaputred &message) override;
 
 	void ClearMessage(Message & message) override;
 

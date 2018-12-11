@@ -13,10 +13,14 @@ public:
 
 	~MySqlDatabaseGateway();
 
+	void insertMessage(const Message & message) override;
+
+	void insertMessageGame(const MessageGameCaputred & message) override;
+
 
 	// Virtual methods from IDatabaseGateway
 
-	void insertMessage(const Message &message) override;
+	//void insertMessage(const Message &message) override;
 
 	void ClearMessage(Message & message) override;
 

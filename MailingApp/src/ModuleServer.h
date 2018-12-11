@@ -43,6 +43,8 @@ private:
 	
 	void onPacketReceivedSendMessage(SOCKET socket, const InputMemoryStream& stream);
 
+	void onPacketReceivedGameCapturedMessage(SOCKET socket, const InputMemoryStream & stream);
+
 	void onPacketReceivedChatMessage(SOCKET socket, const InputMemoryStream & stream);
 
 	void onPacketReceivedEraseMessage(SOCKET socket, const InputMemoryStream & stream);

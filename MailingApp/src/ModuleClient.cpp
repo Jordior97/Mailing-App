@@ -93,6 +93,10 @@ void ModuleClient::updateChat()
 	case ModuleClient::ChatState::EraseMessage:
 		//sendPacketEraseMessage(receiverBufDel, subjectBufDel, messageBufDel);
 		break;
+	//----------------------------------------------
+	case ModuleClient::ChatState::SendGameCaputred:
+		sendPacketSendMessageGameCaptured();
+		break;
 	default:
 		break;
 	}
@@ -264,6 +268,32 @@ void ModuleClient::sendPacketSendMessageChat(const char *message)
 	sendPacket(stream);
 
 	strcpy_s(messageBufChat, "");
+
+	chatState = ChatState::ReceivingMessages;
+}
+
+void ModuleClient::sendPacketSendMessageGameCaptured()
+{
+	OutputMemoryStream stream;
+
+	// TODO: Serialize message (packet type and all fields in the message)
+	// NOTE: remember that senderBuf contains the current client (i.e. the sender of the message)
+	std::string sender_str(senderBuf);
+	std::string Start_Game_str(Start_Game);
+	std::string End_Game_str(End_Game);
+
+	stream.Write(PacketType::SendMessageGameCapturedRequest);
+	stream.Write(sender_str);
+	stream.Write(Start_Game_str);
+	stream.Write(End_Game_str);
+	stream.Write(std::to_string(Enemies_Killed));
+	stream.Write(std::to_string(Gems));
+	stream.Write(std::to_string(Hacks));
+	stream.Write(std::to_string(keys_pressed));
+	stream.Write(std::to_string(dies));
+
+	// TODO: Use sendPacket() to send the packet
+	sendPacket(stream);
 
 	chatState = ChatState::ReceivingMessages;
 }
@@ -515,29 +545,30 @@ void ModuleClient::updateGUIChat()
 	ImGui::End();
 }
 
-bool recording = false;
-float	Start_Game;
-float	End_Game;
-int		Enemies_Killed;
-int		Gems;
-bool	Hacks;
-int		keys_pressed;
-int		dies;
+/*		// Calcul of time
+		time_t     now = time(0);
+		struct tm  tstruct;
+		char       buf[80];
+		tstruct = *localtime(&now);
+		strftime(buf, sizeof(buf), "%X", &tstruct);
+		std::string date_str(buf);
+		*/
+
 void ModuleClient::updateGUIRandomGame()
 {
 	ImGui::Begin("Random values Windows");
-	if (ImGui::Button("Recording"))
+	if (ImGui::Button("Start Recording"))
 	{
 		recording = !recording;
 		if (recording)
 		{
-			Start_Game = 0;
-			End_Game = 0;
-			Enemies_Killed = 0;
-			Gems = 0;
+			//Start_Game[256] = "2018-12-11 11:20:21";
+			//End_Game[256] = "2018-12-11 11:22:21";
+			Enemies_Killed = 4;
+			Gems = 7;
 			Hacks = false;
-			keys_pressed = 0;
-			dies = 0;
+			keys_pressed = 123;
+			dies = 1;
 		}
 	}
 
@@ -547,36 +578,39 @@ void ModuleClient::updateGUIRandomGame()
 
 		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ChildBg, ImVec4(0.2, 0.2, 0.2, 1));
 		ImGui::BeginChild("Child", ImVec2(0, ImGui::GetWindowHeight() - 75), false);
+		ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Button, ImVec4(0.8, 0.1, 0.1, 1));
+		if (ImGui::Button("Randomizated Values"))
+		{
 
+		}
 
+		ImGui::Separator();
 		// float	- Time Start Game
 		// float	- Time End Game
 		// int		- Number Enemies Killed
 		// int		- Number of Gems 
 		// bool		- Use Hacks
 		// int		- Number of keys pressed
-		// int		- Number of dies.
+		// int		- Number of dies.'2018-01-22 14:28:21'
 
-		if (scrollChatDown)
-		{
-			ImGui::SetScrollY(ImGui::GetScrollMaxY());
-			scrollChatDown = false;
-		}
-		if (doscrollChatDown)
-		{
-			doscrollChatDown = false;
-			scrollChatDown = true;
-		}
-		ImGui::PopStyleColor();
+		ImGui::InputText("Start_Game", Start_Game, sizeof(Start_Game));
+		ImGui::InputText("End_Game", End_Game, sizeof(End_Game));
+		ImGui::InputInt("Enemies_Killed", &Enemies_Killed);
+		ImGui::InputInt("Gems", &Gems);
+		ImGui::Checkbox("Use Hacks", &Hacks);
+		ImGui::InputInt("keys_pressed", &keys_pressed);
+		ImGui::InputInt("dies", &dies);
+		ImGui::PopStyleColor(2);
 		ImGui::EndChild();
-	}
 
-	ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
-	//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
-	ImGui::Separator();
-	if (ImGui::Button("Send"))
-	{
-		recording = false;
+		ImGui::SetCursorPos(ImVec2(0, ImGui::GetWindowHeight() - 30));
+		//ImGui::Button("->", ImVec2(0, ImGui::GetWindowHeight() - 20)); ImGui::SameLine();
+		ImGui::Separator();
+		if (ImGui::Button("Send"))
+		{
+			recording = false;
+			chatState = ChatState::SendGameCaputred;
+		}
 	}
 
 	ImGui::End();

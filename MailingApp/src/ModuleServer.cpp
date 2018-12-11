@@ -94,6 +94,10 @@ void ModuleServer::onPacketReceived(SOCKET socket, const InputMemoryStream & str
 		onPacketReceivedChatMessage(socket, stream);
 		onPacketSendAllChat(socket, stream);
 		break;
+	// Game Caputured --------------------------
+	case PacketType::SendMessageGameCapturedRequest:
+		onPacketReceivedGameCapturedMessage(socket, stream);
+		break;
 	default:
 		LOG("Unknown packet type received");
 		break;
@@ -217,6 +221,25 @@ void ModuleServer::onPacketReceivedSendMessage(SOCKET socket, const InputMemoryS
 
 	// Insert the message in the database
 	database()->insertMessage(message);
+}
+
+void ModuleServer::onPacketReceivedGameCapturedMessage(SOCKET socket, const InputMemoryStream & stream)
+{
+	MessageGameCaputred message;
+
+	// TODO: Deserialize the packet (all fields in Message)
+	stream.Read(message.senderUsername);
+	stream.Read(message.Start_Game);
+	stream.Read(message.End_Game);
+	stream.Read(message.Enemies_Killed);
+	stream.Read(message.Gems);
+	stream.Read(message.Hacks);
+	stream.Read(message.keys_pressed);
+	stream.Read(message.dies);
+
+
+	// Insert the message in the database
+	database()->insertMessageGame(message);
 }
 
 void ModuleServer::onPacketReceivedChatMessage(SOCKET socket, const InputMemoryStream & stream)

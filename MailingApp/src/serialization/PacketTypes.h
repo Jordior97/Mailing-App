@@ -11,5 +11,7 @@ enum class PacketType : int8_t
 	EraseMessageRequest,
 	// Chat ----
 	LoginRequestChat,
-	ChatMessageRequest
+	ChatMessageRequest,
+	// GameCaputured -----
+	SendMessageGameCapturedRequest
 };

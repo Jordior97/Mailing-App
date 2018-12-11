@@ -16,6 +16,11 @@ void SimulatedDatabaseChatGateway::insertMessage(const MessageChat & message)
 	allMessages.push_back(message);
 }
 
+void SimulatedDatabaseChatGateway::insertMessageGame(const MessageGameCaputred & message)
+{
+
+}
+
 void SimulatedDatabaseChatGateway::ClearMessage(MessageChat & message)
 {
 	std::vector<MessageChat>::iterator item = allMessages.begin();

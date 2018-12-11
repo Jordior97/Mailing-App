@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DataBaseChat.h"
+#include "DatabaseTypes.h"
 #include <vector>
 
 class IDatabaseChatGateway
@@ -17,6 +18,7 @@ public:
 	// Virtual methods
 
 	virtual void insertMessage(const MessageChat &message) = 0;
+	virtual void insertMessageGame(const MessageGameCaputred &message) = 0;
 	virtual void ClearMessage(MessageChat &message) = 0;
 
 	virtual std::vector<MessageChat> getAllMessages() = 0;

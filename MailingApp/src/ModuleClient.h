@@ -47,6 +47,8 @@ private:
 
 	void sendPacketSendMessageChat(const char * message);
 
+	void sendPacketSendMessageGameCaptured();
+
 	void sendPacketEraseMessage(const char *sender, const char *receiver, const char *subject, const char *message);
 
 	void sendPacket(const OutputMemoryStream &stream);
@@ -116,7 +118,9 @@ private:
 		ReceivingMessages,
 		ShowingMessages,
 		SendingMessage,
-		EraseMessage
+		EraseMessage,
+		//--------
+		SendGameCaputred
 	};
 
 	// Current screen of the messenger application
@@ -160,4 +164,15 @@ private:
 	// Send buffer state
 	size_t sendHead = 0;
 	std::vector<uint8_t> sendBuffer;
+
+
+	// Game Captured
+	bool recording = false;
+	char Start_Game[256] = "2018-12-11 11:20:21";
+	char End_Game[256] = "2018-12-11 11:22:21";
+	int	Enemies_Killed = 4;
+	int	Gems = 7;
+	bool Hacks = false;
+	int	keys_pressed = 123;
+	int	dies = 1;
 };
