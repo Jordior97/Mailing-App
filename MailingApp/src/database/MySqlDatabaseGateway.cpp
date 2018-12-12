@@ -64,9 +64,8 @@ void MySqlDatabaseGateway::insertMessageGame(const MessageGameCaputred & message
 		// TODO: Create the SQL statement to insert the passed message into the DB (INSERT)
 		std::string database = bufMySqlDatabase;
 		sqlStatement = "INSERT " + database + ".GAME_CAPTURED VALUES ('" + message.senderUsername + "', '" +
-			message.Start_Game + "', '" + message.End_Game + "', '" + message.Enemies_Killed +
-			"', '" + message.Gems + "', '" + message.Hacks + "', '" + message.keys_pressed +
-			"', '" + message.dies + "')";
+			message.Enemies_Killed + "', '" + message.Gems + "', '" + message.Hacks + "', '" + 
+			message.keys_pressed + "', '" + message.dies + "')";
 
 		// insert some messages
 		db.sql(sqlStatement.c_str());

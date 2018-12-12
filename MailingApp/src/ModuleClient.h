@@ -168,8 +168,6 @@ private:
 
 	// Game Captured
 	bool recording = false;
-	char Start_Game[256] = "2018-12-11 11:20:21";
-	char End_Game[256] = "2018-12-11 11:22:21";
 	int	Enemies_Killed = 4;
 	int	Gems = 7;
 	bool Hacks = false;

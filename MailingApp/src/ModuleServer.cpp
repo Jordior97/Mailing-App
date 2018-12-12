@@ -229,8 +229,6 @@ void ModuleServer::onPacketReceivedGameCapturedMessage(SOCKET socket, const Inpu
 
 	// TODO: Deserialize the packet (all fields in Message)
 	stream.Read(message.senderUsername);
-	stream.Read(message.Start_Game);
-	stream.Read(message.End_Game);
 	stream.Read(message.Enemies_Killed);
 	stream.Read(message.Gems);
 	stream.Read(message.Hacks);

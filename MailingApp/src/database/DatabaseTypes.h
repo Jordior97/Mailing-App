@@ -13,8 +13,6 @@ struct Message
 struct MessageGameCaputred
 {
 	std::string senderUsername;
-	std::string Start_Game;
-	std::string End_Game;
 	std::string Enemies_Killed;
 	std::string Gems;
 	std::string Hacks;

@@ -279,13 +279,9 @@ void ModuleClient::sendPacketSendMessageGameCaptured()
 	// TODO: Serialize message (packet type and all fields in the message)
 	// NOTE: remember that senderBuf contains the current client (i.e. the sender of the message)
 	std::string sender_str(senderBuf);
-	std::string Start_Game_str(Start_Game);
-	std::string End_Game_str(End_Game);
 
 	stream.Write(PacketType::SendMessageGameCapturedRequest);
 	stream.Write(sender_str);
-	stream.Write(Start_Game_str);
-	stream.Write(End_Game_str);
 	stream.Write(std::to_string(Enemies_Killed));
 	stream.Write(std::to_string(Gems));
 	stream.Write(std::to_string(Hacks));
@@ -562,8 +558,6 @@ void ModuleClient::updateGUIRandomGame()
 		recording = !recording;
 		if (recording)
 		{
-			//Start_Game[256] = "2018-12-11 11:20:21";
-			//End_Game[256] = "2018-12-11 11:22:21";
 			Enemies_Killed = 4;
 			Gems = 7;
 			Hacks = false;
@@ -585,16 +579,12 @@ void ModuleClient::updateGUIRandomGame()
 		}
 
 		ImGui::Separator();
-		// float	- Time Start Game
-		// float	- Time End Game
 		// int		- Number Enemies Killed
 		// int		- Number of Gems 
 		// bool		- Use Hacks
 		// int		- Number of keys pressed
 		// int		- Number of dies.'2018-01-22 14:28:21'
 
-		ImGui::InputText("Start_Game", Start_Game, sizeof(Start_Game));
-		ImGui::InputText("End_Game", End_Game, sizeof(End_Game));
 		ImGui::InputInt("Enemies_Killed", &Enemies_Killed);
 		ImGui::InputInt("Gems", &Gems);
 		ImGui::Checkbox("Use Hacks", &Hacks);
